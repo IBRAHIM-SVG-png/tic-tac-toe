@@ -1,8 +1,10 @@
-let cells = document.querySelectorAll(".cell");
-let player = "X";
-let gameOver = false;
+const cells = document.querySelectorAll(".cell");
+const statusText = document.getElementById("status");
 
-const winPatterns = [
+let currentPlayer = "X";
+let gameActive = true;
+
+const winConditions = [
 [0,1,2],
 [3,4,5],
 [6,7,8],
@@ -14,34 +16,66 @@ const winPatterns = [
 ];
 
 cells.forEach((cell, index) => {
-cell.addEventListener("click", () => {
-
-if(cell.textContent !== "" || gameOver) return;
-
-cell.textContent = player;
-
-checkWinner();
-
-player = player === "X" ? "O" : "X";
-
+    cell.addEventListener("click", () => cellClicked(cell, index));
 });
-});
+
+function cellClicked(cell, index) {
+
+    if(cell.textContent !== "" || !gameActive){
+        return;
+    }
+
+    cell.textContent = currentPlayer;
+
+    checkWinner();
+
+    if(gameActive){
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        statusText.textContent = "Player " + currentPlayer + "'s Turn";
+    }
+}
 
 function checkWinner(){
 
-winPatterns.forEach(pattern => {
+    for(let condition of winConditions){
 
-let a = cells[pattern[0]].textContent;
-let b = cells[pattern[1]].textContent;
-let c = cells[pattern[2]].textContent;
+        let a = cells[condition[0]].textContent;
+        let b = cells[condition[1]].textContent;
+        let c = cells[condition[2]].textContent;
 
-if(a !== "" && a === b && b === c){
+        if(a === "" || b === "" || c === ""){
+            continue;
+        }
 
-alert(a + " Wins!");
-gameOver = true;
+        if(a === b && b === c){
+            statusText.textContent = "Player " + a + " Wins!";
+            gameActive = false;
+            return;
+        }
+    }
 
+    let draw = true;
+
+    cells.forEach(cell => {
+        if(cell.textContent === ""){
+            draw = false;
+        }
+    });
+
+    if(draw){
+        statusText.textContent = "Game Draw!";
+        gameActive = false;
+    }
 }
 
-});
+function restartGame(){
 
+    currentPlayer = "X";
+    gameActive = true;
+
+    statusText.textContent = "Player X's Turn";
+
+    cells.forEach(cell => {
+        cell.textContent = "";
+    });
 }
